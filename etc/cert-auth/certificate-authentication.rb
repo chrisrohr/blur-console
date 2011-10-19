@@ -20,6 +20,7 @@ ApplicationController.class_eval do
     if session[:proof].try(:fetch, :employee_number, nil).present?
       
       employee_number = session[:proof][:employee_number].first.to_s
+      cn = session[:proof][:cn].first.to_s
 
       u = User.where(:username => employee_number).first
       if u.nil?
@@ -27,6 +28,7 @@ ApplicationController.class_eval do
         
         u = User.new
         u.username = employee_number
+        u.name = cn
         u.password = rnd_password
         u.password_confirmation = rnd_password
         u.email = "#{employee_number}@nic.com"
