@@ -9,6 +9,7 @@ public class License {
 	private Date dateIssued;
 	private LicenseType type;
 	private IssuingKey key;
+	private long nodes;
 
 	public String getOrganization() {
 		return organization;
@@ -48,6 +49,14 @@ public class License {
 
 	public void setKey(IssuingKey key) {
 		this.key = key;
+	}
+
+	public long getNodes() {
+		return nodes;
+	}
+
+	public void setNodes(long nodes) {
+		this.nodes = nodes;
 	}
 
 	public Date getDateExpires() {
