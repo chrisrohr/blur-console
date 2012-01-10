@@ -6,8 +6,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.StringTokenizer;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -39,6 +37,8 @@ public class LicensingService {
 		
 		if (LicenseType.NODE_YEARLY.equals(lic.getType())) {
 			sb.append(SEP).append(lic.getNodes());
+		} else if (LicenseType.CLUSTER_YEARLY.equals(lic.getType())) {
+			sb.append(SEP).append(lic.getClusters());
 		}
 		try {
 			StringBuilder licString = new StringBuilder(BEGIN).append(SEP);
@@ -80,6 +80,10 @@ public class LicensingService {
 			String nodes = st.nextToken();
 			license.setNodes(Long.parseLong(nodes));
 			signature = StringUtils.substringAfter(licenseBody, nodes);
+		} else if (LicenseType.CLUSTER_YEARLY.equals(license.getType())) {
+			String clusters = st.nextToken();
+			license.setClusters(Integer.parseInt(clusters));
+			signature = StringUtils.substringAfter(licenseBody, clusters);
 		}
 		
 		String licenseData = StringUtils.substringBefore(licenseBody, signature);
@@ -96,6 +100,11 @@ public class LicensingService {
 	}
 
 	public static void main(String[] args) throws Exception {
+		if (args.length < 2) {
+			System.out.println("Usage: Organization License-type [options]");
+			System.exit(1);
+		}
+		
 		LicensingService service = new LicensingService();
 		service.setCryptoServices(CryptoServices.getCryptoServices());
 
@@ -109,16 +118,12 @@ public class LicensingService {
 		ik.setPublicKey(CryptoServices.getCryptoServices().decodeBase64("MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEAr70Zcg1WlzllR6xuxJEBuaETSbgAHY6IuZ9lqLWPEdj1I8cQdk28NONmsqMj0jHBjDmqby1YYIsj3+kxib6Ow2rxL/r2EXsdzZxXTdVCDzJMX1JqVSKLqXmbYB7gy9xLqxxDYCVZwTmhAQmhU1KN1PA6IzvyNFcPfG11qyzrfwqAJ+8rA4556KtEe9EbWBPh3PEEqcuq7lQAFXrrr32cvluSVgqgTF2eLYaRyyPxgvBTkFSg4OkdzT2gP+ggiL9SBXA9y6yLZZR2ehMxS5GhS+96n95wLF5CIbg4onefQzZ65/VGwaSeWbPM/8RBUcK/jRC99rNcF6phywJCiKMgJ+u9cj1ThuIBm5LhSs2FreCuDNtUkna4ernk0Ndy1vSpTu0+h5IiMbz2cbfDJq++w8Os7J/Pt3XfgON2cHcJyEEbkzsJ71Z8+lebMydzX/al95FyXDrobuUuUfOVNrXWKqFB+BRIHPTVJo2tP9FGjcxhmj5vHQkGEAh/0n9b93cCBN6e//ft9TP/yELT+lSFJIeJOHj8gUvSFT5JfilTjZLHvLweMR9ZVlfseq1NC8EoYWgpa6PQcUh2PzuTBgoCyRCG4/mIqw45ICuLeS/MwGERJqWpxWPKRpSbklWDrFObOrfaPb+bvKzsPvbf0Q1x+Azqr9d4OSm7DunNAtV85aUCAwEAAQ=="));
 		lic.setKey(ik);
 		
-		if (args.length > 2 && isNumber(args[2])) {
-			lic.setNodes(Long.parseLong(args[2]));
-		} else {
-			lic.setNodes(-1);
-		}
-
-		if (args.length > 3 || (args.length > 2 && !isNumber(args[2]))) {
-			lic.setDateIssued(sdf.parse(args[args.length-1]));
-		} else {
-			lic.setDateIssued(new Date());
+		if (LicenseType.YEARLY.equals(lic.getType())){
+			parseArgsForYearly(lic, args);
+		} else if (LicenseType.NODE_YEARLY.equals(lic.getType())) {
+			parseArgsForNodeYearly(lic, args);
+		} else if (LicenseType.CLUSTER_YEARLY.equals(lic.getType())) {
+			parseArgsForClusterYearly(lic, args);
 		}
 
 		String slic = service.generateLicense(lic, ik);
@@ -133,15 +138,41 @@ public class LicensingService {
 //		service.parseLicense(slic, ik);
 	}
 	
-	private static boolean isNumber(String arg) {
-		boolean isValid = false;
-		String expression = "[-+]?[0-9]*\\.?[0-9]+$";  
-        CharSequence inputStr = arg;  
-        Pattern pattern = Pattern.compile(expression);  
-        Matcher matcher = pattern.matcher(inputStr);  
-        if(matcher.matches()){  
-           isValid = true;  
-        }  
-        return isValid;  
+	private static void parseArgsForYearly(License license, String[] args) throws ParseException {
+		if (args.length >= 3) {
+			license.setDateIssued(sdf.parse(args[2]));
+		} else {
+			license.setDateIssued(new Date());
+		}
+	}
+	
+	private static void parseArgsForNodeYearly(License license, String[] args) throws ParseException {
+		if (args.length < 3) {
+			System.out.println("node_yearly license type requires the number of nodes to be passed in.");
+			System.exit(1);
+		}
+		
+		license.setNodes(Long.parseLong(args[2]));
+		
+		if (args.length >= 4) {
+			license.setDateIssued(sdf.parse(args[2]));
+		} else {
+			license.setDateIssued(new Date());
+		}
+	}
+	
+	private static void parseArgsForClusterYearly(License license, String[] args) throws ParseException {
+		if (args.length < 3) {
+			System.out.println("cluster_yearly license type requires the number of clusters to be passed in.");
+			System.exit(1);
+		}
+		
+		license.setClusters(Integer.parseInt(args[2]));
+		
+		if (args.length >= 4) {
+			license.setDateIssued(sdf.parse(args[2]));
+		} else {
+			license.setDateIssued(new Date());
+		}
 	}
 }

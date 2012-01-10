@@ -10,6 +10,7 @@ public class License {
 	private LicenseType type;
 	private IssuingKey key;
 	private long nodes;
+	private int clusters;
 
 	public String getOrganization() {
 		return organization;
@@ -64,5 +65,13 @@ public class License {
 		cal.setTime(dateIssued);
 		cal.add(Calendar.YEAR, 1);
 		return cal.getTime();
+	}
+
+	public int getClusters() {
+		return clusters;
+	}
+
+	public void setClusters(int clusters) {
+		this.clusters = clusters;
 	}
 }
