@@ -29,10 +29,10 @@ module Proof
 
         Net::LDAP.open(@config.ldap_connection) do |conn|
           search_for_user(conn, cn, cert, attributes)
-          search_for_groups(conn, attributes) if attributes.present? && @config.include_groups
+          search_for_groups(conn, attributes) if (!attributes.nil? && !attributes.empty?) && @config.include_groups
         end
 
-        request.session[:proof] = attributes if attributes.present?
+        request.session[:proof] = attributes if (!attributes.nil? && !attributes.empty?)
       end
 
       def search_for_user(conn, cn, cert, attributes)
@@ -72,7 +72,7 @@ module Proof
         params = { :base => @config.group_search_base, :attributes => ['cn'], :filter => filter }
         groups_to_search = conn.search(params) - groups
         groups.concat(groups_to_search)
-        append_nested_groups(conn, groups, groups_to_search) if groups_to_search.present?
+        append_nested_groups(conn, groups, groups_to_search) if (!groups_to_search.nil? && !groups_to_search.empty?)
       end
 
       def cert_match?(ldap_entry, cert)
