@@ -68,4 +68,4 @@ cp -r license-maker build/agent-/license-maker
 cp extra/my-agent.sh build/agent-/bin/agent.sh
 cp extra/mysql-connector-java-5.1.16.jar build/agent-/lib/mysql-connector-java-5.1.16.jar
 cd extra
-./start-agent.sh
+echo
