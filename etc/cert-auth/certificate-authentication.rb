@@ -24,7 +24,7 @@ ApplicationController.class_eval do
 
       u = User.where(:username => employee_number).first
       if u.nil?
-        rnd_password = ActiveSupport::SecureRandom.base64(20)
+        rnd_password = SecureRandom.base64(20)
         
         u = User.new
         u.username = employee_number
