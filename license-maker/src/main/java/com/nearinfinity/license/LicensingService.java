@@ -170,7 +170,7 @@ public class LicensingService {
 		license.setClusters(Integer.parseInt(args[2]));
 		
 		if (args.length >= 4) {
-			license.setDateIssued(sdf.parse(args[2]));
+			license.setDateIssued(sdf.parse(args[3]));
 		} else {
 			license.setDateIssued(new Date());
 		}
