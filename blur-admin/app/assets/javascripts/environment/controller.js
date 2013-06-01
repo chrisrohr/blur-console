@@ -29,7 +29,7 @@ var ControllerCollection = Backbone.StreamCollection.extend({
   model: ControllerModel,
   initialize: function(models, options){
     this.on('add', function(controller){
-      if (this.length == 1){
+      if (this.length == 0){
         $('#controllers .no_children').hide();
         $('#controllers tbody').append(controller.view.render().$el);
       } else {
@@ -59,7 +59,7 @@ var ControllerView = Backbone.View.extend({
     return this;
   },
   setRowStatus: function(){
-    switch(this.model.get('status'))
+    switch(this.model.get('controller_status'))
     {
       case 0:
         this.$el.attr('class', 'error');
